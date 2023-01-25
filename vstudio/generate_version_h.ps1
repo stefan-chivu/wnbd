@@ -4,6 +4,7 @@ $scriptLocation = [System.IO.Path]::GetDirectoryName(
     $myInvocation.MyCommand.Definition)
 
 $versionHeaderPath = "$scriptLocation/../include/version.h"
+$infFilePath = "$scriptLocation/../driver/wnbd.inf"
 
 try {
     $gitShortDesc = git describe --tags
@@ -77,5 +78,9 @@ if ($versionDetected -or (!(test-path $versionHeaderPath))) {
 Please fill in the WNBD version and then remove this error.
 "@
         echo $err | out-file -append -encoding utf8 -filepath $versionHeaderPath
+    } else {
+        $date = Get-Date -Format "MM/dd/yyyy"
+        (Get-Content $infFilePath) -replace "DriverVer = .+$", "DriverVer = $date, $versionStrMS" | Set-Content $infFilePath
+        (Get-Content $infFilePath) -replace "DriverVersion,,.+$", "DriverVersion,,`"$versionStrMS`"" | Set-Content $infFilePath
     }
 }
